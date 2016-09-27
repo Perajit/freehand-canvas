@@ -1,0 +1,122 @@
+<link rel="import" href="bower_components/polymer/polymer.html">
+<link rel="import" href="freehand-draw-line.html">
+
+<dom-module id="freehand-canvas">
+  <template>
+    <style>
+      :host {
+        box-sizing: border-box;
+        display: block;
+      }
+      canvas {
+        box-sizing: border-box;
+        border: solid 1px #000;
+      }
+    </style>
+    <div>
+      <canvas id="freehandCanvas"></canvas>
+    </div>
+    <div>
+      <select data-model="lineWidth" value="{{lineWidth::change}}">
+        <template is="dom-repeat" items="[[_lineWidthOptions]]" as="lineWidthOption">
+          <option value="[[lineWidthOption]]" selected$="[[_getSelectedState('lineWidth', lineWidthOption)]]">[[lineWidthOption]]</option>
+        </template>
+      </select>
+      <select data-model="lineColor" value="{{lineColor::change}}">
+        <template is="dom-repeat" items="[[_lineColorOptions]]" as="lineColorOption">
+          <option value="[[lineColorOption]]" selected$="[[_getSelectedState('lineColor', lineColorOption)]]">[[lineColorOption]]</option>
+        </template>
+      </select>
+      <button on-click="reset">reset</button>
+    </div>
+  </template>
+
+  <script>
+  (function () {
+    'use strict';
+
+    var defaultPrefs = {
+      height: 400,
+      lineWidth: 5,
+      lineColor: 'black'
+    };
+    var lineWidthOptions = [1, 5, 10, 20, 40];
+    var lineColorOptions = ['black', 'red', 'green', 'blue'];
+
+    Polymer({
+      is: 'freehand-canvas',
+      properties: {
+        canvasWidth: {
+          type: Number,
+          observer: '_canvasWidthChanged',
+        },
+        canvasHeight: {
+          type: Number,
+          observer: '_canvasHeightChanged'
+        },
+        lineWidth: {
+          type: Number,
+          observer: '_lineWidthChanged',
+          value: defaultPrefs.lineWidth
+        },
+        lineColor: {
+          type: String,
+          observer: '_lineColorChanged',
+          value: defaultPrefs.lineColor
+        },
+        _lineWidthOptions: {
+          type: Array,
+          value: lineWidthOptions
+        },
+        _lineColorOptions: {
+          type: Array,
+          value: lineColorOptions
+        }
+      },
+      behaviors: [
+        FreehandDrawLine
+      ],
+      ready: function () {
+        this.canvas = this.$.freehandCanvas;
+        this.context = this.canvas.getContext('2d');
+      },
+      attached: function () {
+        // Ensure updated size
+        this._updatecanvasSize();
+      },
+      getStrokeStyle: function () {
+        // FIXME: Support other types of brush
+        return this.lineColor;
+      },
+      _canvasWidthChanged: function () {
+        this._updatecanvasSize();
+      },
+      _canvasHeightChanged: function () {
+        this._updatecanvasSize();
+      },
+      _lineWidthChanged: function (newValue, oldValue) {
+        if (lineWidthOptions.indexOf(newValue) < 0) {
+          this.lineWidth = defaultPrefs.lineWidth;
+        }
+      },
+      _lineColorChanged: function (newValue, oldValue) {
+        if (lineColorOptions.indexOf(newValue) < 0) {
+          this.lineColor = defaultPrefs.lineColor;
+        }
+      },
+      _updatecanvasSize: function () {
+        var canvas = this.canvas;
+        if (!canvas) {
+          return;
+        }
+
+        canvas.width = isNaN(this.canvasWidth) ? this.getBoundingClientRect().width : this.canvasWidth;
+        canvas.height = isNaN(this.canvasHeight) ? defaultPrefs.height : this.canvasHeight;
+      },
+      _getSelectedState: function (prefType, prefValue) {
+        return this[prefType] === prefValue;
+      }
+    });
+  })();
+  </script>
+</dom-module>

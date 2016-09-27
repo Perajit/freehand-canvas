@@ -1,0 +1,5 @@
+node_modules/
+bower_components/
+test/reports/
+*.lock
+npm-debug.log

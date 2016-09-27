@@ -1,0 +1,169 @@
+<script>
+(function () {
+  function getRelativeMouseCoordinate (event, canvas) {
+    // FIXME: Support touch event
+    var eventX = event.pageX;
+    var eventY = event.pageY;
+    var rect = canvas.getBoundingClientRect();
+
+    return [eventX - rect.left, eventY - rect.top];
+  }
+
+  function clearCanvas (context) {
+    var canvas = context.canvas;
+    context.clearRect(0, 0, canvas.width, canvas.height);
+  }
+
+  function redrawLines (context, lines) {
+    clearCanvas(context);
+
+    // Redraw all lines
+    lines.forEach(function (line) {
+      drawLine(context, line);
+    });
+  }
+
+  function drawLine (context, line) {
+    context.strokeStyle = line.strokeStyle;
+    context.lineWidth = line.lineWidth;
+    context.lineJoin = context.lineCap = 'round';
+    context.beginPath();
+
+    var coordinates = line.coordinates;
+    var coordinate;
+    var startX;
+    var startY;
+    var endX;
+    var endY;
+
+    for (var i = 0; i < coordinates.length; ++i) {
+      coordinate = coordinates[i];
+      endX = coordinate[0];
+      endY = coordinate[1];
+
+      if (startX === undefined) {
+        startX = endX - 1;
+        startY = endY - 1;
+        context.moveTo(startX, startY);
+      }
+
+      context.lineTo(endX, endY);
+    }
+
+    context.stroke();
+    context.closePath();
+  }
+
+  window.FreehandDrawLine = {
+    _dragging: false,
+    properties: {
+      lines: {
+        type: Array,
+        value: function () {
+          return [];
+        }
+      }
+    },
+    observers: [
+      '_linesUpdated(lines.*)'
+    ],
+    listeners: {
+      'freehandCanvas.mousedown': '_onCanvasMouseDown'
+    },
+    reset: function () {
+      this.lines = [];
+    },
+    addLine: function (line, opt_lineIndex) {
+      if (isNaN(opt_lineIndex)) {
+        this.push('lines', line);
+      }
+      else {
+        this.splice('lines', +opt_lineIndex, 0, line);
+      }
+    },
+    removeLine: function (lineIndex) {
+      if (lineIndex === this.lines.length - 1) {
+        return this.pop('lines');
+      }
+      else {
+        return this.splice('lines', +lineIndex, 1)[0];
+      }
+    },
+    replaceLine: function (lineIndex, line) {
+      this.splice('lines', +lineIndex, line);
+    },
+    _onCanvasMouseDown: function (event) {
+      if (event.which !== 1) {
+        return;
+      }
+
+      // Prevent selecting any element outside to avoid drawing path breaking
+      event.preventDefault();
+      event.stopPropagation();
+
+      this._startLinePath(event);
+    },
+    _onCanvasMouseMove: function (event) {
+      if (!this._dragging || event.which !== 1) {
+        return;
+      }
+
+      this._extendLinePath(event);
+    },
+    _onCanvasMouseLeave: function (event) {
+      this._stopLinePath(event);
+    },
+    _onWindowMouseUp: function (event) {
+      if (event.which !== 1) {
+        return;
+      }
+
+      this._stopLinePath(event);
+    },
+    _linesUpdated: function () {
+      if (!this.context) {
+        return;
+      }
+
+      redrawLines(this.context, this.lines);
+    },
+    _startLinePath: function (event, opt_lineIndex) {
+      var line = {
+        lineWidth: this.lineWidth,
+        strokeStyle: this.getStrokeStyle(),
+        coordinates: [this._getRelativeMouseCoordinate(event)]
+      };
+      this.addLine(line);
+
+      this._dragging = true;
+      this.listen(this, 'mousemove', '_onCanvasMouseMove');
+      this.listen(this, 'mouseleave', '_onCanvasMouseLeave');
+      this.listen(window, 'mouseup', '_onWindowMouseUp', true);
+
+      this.fire('line-started', line);
+    },
+    _stopLinePath: function (event) {
+      if (!this._dragging) {
+        return;
+      }
+
+      var lineIndex = this.lines.length - 1;
+      this._extendLinePath(event);
+
+      this._dragging = false;
+      this.unlisten(this, 'mousemove', '_onCanvasMouseMove');
+      this.unlisten(this, 'mouseleave', '_onCanvasMouseLeave');
+      this.unlisten(window, 'mouseup', '_onWindowMouseUp', true);
+
+      this.fire('line-stoped', this.get('lines.#' + lineIndex));
+    },
+    _extendLinePath: function (event) {
+      var lineIndex = this.lines.length - 1;
+      this.push('lines.#' + lineIndex + '.coordinates', this._getRelativeMouseCoordinate(event));
+    },
+    _getRelativeMouseCoordinate: function () {
+      return getRelativeMouseCoordinate(event, this.canvas)
+    }
+  };
+})();
+</script>
