@@ -17,16 +17,8 @@
       <canvas id="freehandCanvas"></canvas>
     </div>
     <div>
-      <select data-model="lineWidth" value="{{lineWidth::change}}">
-        <template is="dom-repeat" items="[[_lineWidthOptions]]" as="lineWidthOption">
-          <option value="[[lineWidthOption]]" selected$="[[_getSelectedState('lineWidth', lineWidthOption)]]">[[lineWidthOption]]</option>
-        </template>
-      </select>
-      <select data-model="lineColor" value="{{lineColor::change}}">
-        <template is="dom-repeat" items="[[_lineColorOptions]]" as="lineColorOption">
-          <option value="[[lineColorOption]]" selected$="[[_getSelectedState('lineColor', lineColorOption)]]">[[lineColorOption]]</option>
-        </template>
-      </select>
+      <select data-model="lineWidth" value="{{lineWidth::change}}"></select>
+      <select data-model="lineColor" value="{{lineColor::change}}"></select>
       <button value="reset" on-click="reset">reset</button>
     </div>
   </template>
@@ -40,8 +32,10 @@
       lineWidth: 5,
       lineColor: 'black'
     };
-    var lineWidthOptions = [1, 5, 10, 20, 40];
-    var lineColorOptions = ['black', 'red', 'green', 'blue'];
+    var prefOptions = {
+      lineWidth: [1, 5, 10, 20, 40],
+      lineColor: ['black', 'red', 'green', 'blue']
+    };
 
     Polymer({
       is: 'freehand-canvas',
@@ -66,11 +60,11 @@
         },
         _lineWidthOptions: {
           type: Array,
-          value: lineWidthOptions
+          value: prefOptions.lineWidth
         },
         _lineColorOptions: {
           type: Array,
-          value: lineColorOptions
+          value: prefOptions.lineColor
         }
       },
       behaviors: [
@@ -79,6 +73,7 @@
       ready: function () {
         this.canvas = this.$.freehandCanvas;
         this.context = this.canvas.getContext('2d');
+        this._initSelectOptions();
       },
       attached: function () {
         // Ensure updated size
@@ -95,14 +90,29 @@
         this._updatecanvasSize();
       },
       _lineWidthChanged: function (newValue, oldValue) {
-        if (lineWidthOptions.indexOf(+newValue) < 0) {
+        if (prefOptions.lineWidth.indexOf(+newValue) < 0) {
           this.lineWidth = defaultPrefs.lineWidth;
         }
       },
       _lineColorChanged: function (newValue, oldValue) {
-        if (lineColorOptions.indexOf(newValue) < 0) {
+        if (prefOptions.lineColor.indexOf(newValue) < 0) {
           this.lineColor = defaultPrefs.lineColor;
         }
+      },
+      _initSelectOptions: function () {
+        Object.keys(prefOptions).forEach(function (optionType) {
+          var optionValues = prefOptions[optionType];
+          var select = this.$$('[data-model="' + optionType + '"]');
+
+          optionValues.forEach(function (optionValue) {
+            var option = document.createElement('option');
+            option.value = optionValue;
+            option.textContent = optionValue;
+            Polymer.dom(select).appendChild(option);
+          });
+
+          select.selectedIndex = optionValues.indexOf(this[optionType]);
+        }, this);
       },
       _updatecanvasSize: function () {
         var canvas = this.canvas;
