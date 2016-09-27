@@ -6,13 +6,9 @@ suite('freehand-canvas dimension', function() {
 
   setup(function () {
     el = fixture('basic');
-    canvas = el.$$('canvas');
+    canvas = el.canvas;
     defaultWidth = el.getBoundingClientRect().width;
     defaultHeight = 400;
-  });
-
-  test('the element has correct default width', function () {
-    assert.equal(canvas.width, defaultWidth, 'Default canvas width is fitted to the root element')
   });
 
   test('the element has correct default height',  function () {
@@ -30,13 +26,8 @@ suite('freehand-canvas dimension', function() {
       el.canvasWidth = testCase.width;
       el.canvasHeight = testCase.height;
 
-      assert.deepEqual({
-        width: canvas.width,
-        height: canvas.height
-      }, {
-        width: testCase.expectedWidth,
-        height: testCase.expectedHeight
-      }, 'Canvas\'s dimension is correct');
+      assert.isBelow(Math.abs(canvas.width - testCase.expectedWidth), 1, 'Canvas\'s width is correct');
+      assert.isBelow(Math.abs(canvas.height - testCase.expectedHeight), 1, 'Canvas\'s height is correct');
     });
   });
 

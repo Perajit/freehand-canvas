@@ -1,14 +1,15 @@
 suite('freehand-canvas lineColor', function() {
   var el;
   var context;
+  var lineColorOptions = ['black', 'red', 'green', 'blue'];
   var defaultLineColor;
-  var selLineColor;
+  var control;
 
   setup(function () {
     el = fixture('basic');
-    context = el.$$('canvas').getContext('2d');
+    context = el.context;
     defaultLineColor = 'black';
-    selLineColor = el.$$('[data-model="lineColor"]');
+    control = el.$$('[data-model="lineColor"]');
   });
 
   test('the element has correct default line color', function (done) {
@@ -19,12 +20,12 @@ suite('freehand-canvas lineColor', function() {
   });
 
   test('support setting matched line color', function(done) {
-    var testCases = ['black', 'red', 'green', 'blue'];
+    var testCases = lineColorOptions;
 
     flush(function () {
       testCases.forEach(function (testCase, i) {
         el.lineColor = testCase;
-        assert.equal(selLineColor.value, testCase, 'Line color option is selected');
+        assert.equal(control.value, testCase, 'Line color option is selected');
       });
       done();
     });
@@ -38,17 +39,9 @@ suite('freehand-canvas lineColor', function() {
         var expectedLineColor = 1;
         el.lineColor = 'red'; // Force to matched value
         el.lineColor = testCase;
-        assert.equal(selLineColor.value, defaultLineColor, 'Line color option is not changed');
+        assert.equal(control.value, defaultLineColor, 'Line color option is not changed');
       });
       done();
-    });
-  });
-
-  test('line color is binded with selected', function () {
-    var options = Polymer.dom(selLineColor).querySelectorAll('option');
-    options.forEach(function (option, i) {
-      selLineColor.selectedIndex = i;
-      assert.equal(el.lineColor, option.value, 'Line color selection is applied to the element');
     });
   });
 

@@ -1,14 +1,15 @@
 suite('freehand-canvas lineWidth', function() {
   var el;
   var context;
+  var lineWidthOptions = [1, 5, 10, 20, 40];
   var defaultLineWidth;
-  var selLineWidth;
+  var control;
 
   setup(function () {
     el = fixture('basic');
-    context = el.$$('canvas').getContext('2d');
+    context = el.context;
     defaultLineWidth = 5;
-    selLineWidth = el.$$('[data-model="lineWidth"]');
+    control = el.$$('[data-model="lineWidth"]');
   });
 
   test('the element has correct default line width', function (done) {
@@ -19,12 +20,12 @@ suite('freehand-canvas lineWidth', function() {
   });
 
   test('support setting matched line width', function(done) {
-    var testCases = [1, 5, 10, 20, 40];
+    var testCases = lineWidthOptions;
 
     flush(function () {
       testCases.forEach(function (testCase, i) {
         el.lineWidth = testCase;
-        assert.equal(selLineWidth.value, testCase, 'Line width option is selected');
+        assert.equal(control.value, testCase, 'Line width option is selected');
       });
       done();
     });
@@ -37,17 +38,9 @@ suite('freehand-canvas lineWidth', function() {
       testCases.forEach(function (testCase, i) {
         el.lineWidth = 1; // Force to matched value
         el.lineWidth = testCase;
-        assert.equal(selLineWidth.value, defaultLineWidth, 'Line width option is not changed');
+        assert.equal(control.value, defaultLineWidth, 'Line width option is not changed');
       });
       done();
-    });
-  });
-
-  test('line width is binded with selected', function () {
-    var options = Polymer.dom(selLineWidth).querySelectorAll('option');
-    options.forEach(function (option, i) {
-      selLineWidth.selectedIndex = i;
-      assert.equal(el.lineWidth, +option.value, 'Line width selection is applied to the element');
     });
   });
 

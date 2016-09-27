@@ -51,4 +51,10 @@ suite('freehand-canvas basic', function() {
     assert.equal(btnReset.textContent, 'reset', 'Contains rest button');
   });
 
+  test('the element contains correct properties', function () {
+    var canvas = el.$$('canvas');
+    assert.equal(el.canvas, canvas, 'Has property canvas');
+    assert.equal(el.context, canvas.getContext('2d'), 'Has property canvas');
+  });
+
 });
