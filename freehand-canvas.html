@@ -95,7 +95,7 @@
         this._updatecanvasSize();
       },
       _lineWidthChanged: function (newValue, oldValue) {
-        if (lineWidthOptions.indexOf(newValue) < 0) {
+        if (lineWidthOptions.indexOf(+newValue) < 0) {
           this.lineWidth = defaultPrefs.lineWidth;
         }
       },
