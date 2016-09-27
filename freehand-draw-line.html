@@ -6,7 +6,7 @@
     var eventY = event.pageY;
     var rect = canvas.getBoundingClientRect();
 
-    return [eventX - rect.left, eventY - rect.top];
+    return [eventX - rect.left - window.pageXOffset, eventY - rect.top - window.pageYOffset];
   }
 
   function clearCanvas (context) {
