@@ -44,4 +44,12 @@ suite('freehand-canvas lineColor', function() {
     });
   });
 
+  test('line color is binded with selected', function () {
+    var options = Polymer.dom(selLineColor).querySelectorAll('option');
+    options.forEach(function (option, i) {
+      selLineColor.selectedIndex = i;
+      assert.equal(el.lineColor, option.value, 'Line color selection is applied to the element');
+    });
+  });
+
 });

@@ -47,7 +47,7 @@ suite('freehand-canvas basic', function() {
     });
 
     // Reset button
-    var btnReset = el.$$('button');
+    var btnReset = el.$$('button[value="reset"]');
     assert.equal(btnReset.textContent, 'reset', 'Contains rest button');
   });
 

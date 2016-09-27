@@ -43,4 +43,12 @@ suite('freehand-canvas lineWidth', function() {
     });
   });
 
+  test('line width is binded with selected', function () {
+    var options = Polymer.dom(selLineWidth).querySelectorAll('option');
+    options.forEach(function (option, i) {
+      selLineWidth.selectedIndex = i;
+      assert.equal(el.lineWidth, +option.value, 'Line width selection is applied to the element');
+    });
+  });
+
 });
